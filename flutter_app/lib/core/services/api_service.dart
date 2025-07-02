@@ -196,10 +196,15 @@ class ApiService {
   }
 
   // Dashboard stats
-  Future<ApiResponse<Map<String, dynamic>>> getDashboardStats() async {
+  Future<ApiResponse<Map<String, dynamic>>> getDashboardStats(
+      [int? userId]) async {
     try {
+      String url = '$baseUrl/dashboard_stats.php';
+      if (userId != null) {
+        url += '?user_id=$userId';
+      }
       final response = await http.get(
-        Uri.parse('$baseUrl/dashboard_stats.php'),
+        Uri.parse(url),
         headers: _headers,
       );
 

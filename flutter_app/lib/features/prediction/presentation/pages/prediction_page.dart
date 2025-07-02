@@ -74,13 +74,6 @@ class _PredictionPageState extends State<PredictionPage> {
           backgroundColor: AppTheme.successColor,
         ),
       );
-    } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(predictionProvider.error ?? 'Prediction failed'),
-          backgroundColor: AppTheme.dangerColor,
-        ),
-      );
     }
   }
 
@@ -169,38 +162,6 @@ class _PredictionPageState extends State<PredictionPage> {
             const FieldGuideCard(),
 
             const SizedBox(height: 16),
-
-            // Error Display
-            if (predictionProvider.error != null) ...[
-              Card(
-                color: AppTheme.dangerColor.withOpacity(0.1),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: AppTheme.dangerColor,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          predictionProvider.error!,
-                          style: const TextStyle(color: AppTheme.dangerColor),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          predictionProvider.clearError();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
 
             // Prediction Form
             Card(

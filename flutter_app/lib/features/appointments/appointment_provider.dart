@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'appointment_model.dart';
 import 'appointment_service.dart';
+import '../../core/providers/auth_provider.dart';
 
 class AppointmentProvider with ChangeNotifier {
   List<Appointment> _appointments = [];
@@ -19,7 +20,7 @@ class AppointmentProvider with ChangeNotifier {
 
     try {
       final result = await AppointmentService.bookAppointment(appointment);
-      
+
       if (result['success']) {
         // Add the new appointment to the list
         _appointments.add(appointment);
@@ -41,13 +42,13 @@ class AppointmentProvider with ChangeNotifier {
   }
 
   // Load user appointments
-  Future<void> loadUserAppointments() async {
+  Future<void> loadUserAppointments(int userId) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final appointments = await AppointmentService.getUserAppointments();
+      final appointments = await AppointmentService.getUserAppointments(userId);
       _appointments = appointments;
       _isLoading = false;
       notifyListeners();
@@ -79,21 +80,19 @@ class AppointmentProvider with ChangeNotifier {
   }
 
   // Update appointment status (admin)
-  Future<bool> updateAppointmentStatus(
-    int appointmentId, 
-    String status, 
-    {String? adminNotes}
-  ) async {
+  Future<bool> updateAppointmentStatus(int appointmentId, String status,
+      {String? adminNotes}) async {
     try {
       final result = await AppointmentService.updateAppointmentStatus(
-        appointmentId, 
-        status, 
+        appointmentId,
+        status,
         adminNotes: adminNotes,
       );
-      
+
       if (result['success']) {
         // Update the appointment in the list
-        final index = _appointments.indexWhere((app) => app.id == appointmentId);
+        final index =
+            _appointments.indexWhere((app) => app.id == appointmentId);
         if (index != -1) {
           _appointments[index] = _appointments[index].copyWith(
             status: status,
@@ -126,7 +125,9 @@ class AppointmentProvider with ChangeNotifier {
 
   // Get appointments by status
   List<Appointment> getAppointmentsByStatus(String status) {
-    return _appointments.where((appointment) => appointment.status == status).toList();
+    return _appointments
+        .where((appointment) => appointment.status == status)
+        .toList();
   }
 
   // Clear error
@@ -140,4 +141,4 @@ class AppointmentProvider with ChangeNotifier {
     _appointments.clear();
     notifyListeners();
   }
-} 
+}

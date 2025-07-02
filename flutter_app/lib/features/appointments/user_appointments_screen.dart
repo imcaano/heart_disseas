@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'appointment_provider.dart';
+import '../../core/providers/auth_provider.dart';
 
 class UserAppointmentsScreen extends StatefulWidget {
   const UserAppointmentsScreen({super.key});
@@ -14,7 +15,8 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AppointmentProvider>().loadUserAppointments();
+      final userId = context.read<AuthProvider>().currentUser!.id;
+      context.read<AppointmentProvider>().loadUserAppointments(userId);
     });
   }
 
@@ -59,7 +61,8 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              context.read<AppointmentProvider>().loadUserAppointments();
+              final userId = context.read<AuthProvider>().currentUser!.id;
+              context.read<AppointmentProvider>().loadUserAppointments(userId);
             },
           ),
         ],
@@ -100,7 +103,9 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
                   ElevatedButton(
                     onPressed: () {
                       appointmentProvider.clearError();
-                      appointmentProvider.loadUserAppointments();
+                      final userId =
+                          context.read<AuthProvider>().currentUser!.id;
+                      appointmentProvider.loadUserAppointments(userId);
                     },
                     child: const Text('Retry'),
                   ),
@@ -140,7 +145,8 @@ class _UserAppointmentsScreenState extends State<UserAppointmentsScreen> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              await appointmentProvider.loadUserAppointments();
+              final userId = context.read<AuthProvider>().currentUser!.id;
+              await appointmentProvider.loadUserAppointments(userId);
             },
             child: ListView.builder(
               padding: const EdgeInsets.all(16),

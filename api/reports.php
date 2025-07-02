@@ -5,8 +5,9 @@ session_start();
 // Required files
 require_once dirname(__DIR__) . '/config.php';
 
-// Check if user is logged in
-if (!isset($_SESSION['user'])) {
+// Check if user is logged in or user_id is provided for API
+$user_id_param = $_GET['user_id'] ?? $_POST['user_id'] ?? null;
+if (!isset($_SESSION['user']) && !$user_id_param) {
     http_response_code(401);
     echo json_encode(['error' => 'Unauthorized']);
     exit;
@@ -25,8 +26,14 @@ $endDateTime = new DateTime($endDate);
 $interval = $startDateTime->diff($endDateTime);
 $days = $interval->days + 1; // Include the end date
 
-// Determine if admin or regular user
-$isAdmin = in_array($_SESSION['user']['role'], ['admin', 'developer']);
+// Determine user context
+$isAdmin = isset($_SESSION['user']) && in_array($_SESSION['user']['role'], ['admin', 'developer']);
+$user_id = $_SESSION['user']['id'] ?? $user_id_param;
+if ($user_id_param && isset($_SESSION['user']) && !$isAdmin && $_SESSION['user']['id'] != $user_id_param) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Unauthorized']);
+    exit;
+}
 
 // Prepare response structure
 $response = [
@@ -68,7 +75,7 @@ try {
     // For regular users, limit to their own predictions
     if (!$isAdmin) {
         $whereConditions[] = "user_id = ?";
-        $params[] = $_SESSION['user']['id'];
+        $params[] = $user_id;
     }
 
     // Combine conditions

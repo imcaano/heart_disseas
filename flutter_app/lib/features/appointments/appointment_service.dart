@@ -29,10 +29,14 @@ class AppointmentService {
   }
 
   // Get user's appointments
-  static Future<List<Appointment>> getUserAppointments() async {
+  static Future<List<Appointment>> getUserAppointments([int? userId]) async {
     try {
+      String url = '$baseUrl/get_appointment_details.php';
+      if (userId != null) {
+        url += '?user_id=$userId';
+      }
       final response = await http.get(
-        Uri.parse('$baseUrl/get_appointment_details.php'),
+        Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
         },

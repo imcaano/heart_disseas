@@ -31,10 +31,59 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 }
 */
 
+// Accept user_id as GET or POST parameter
+$user_id = $_GET['user_id'] ?? $_POST['user_id'] ?? null;
+
 try {
     // Create database connection
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    if ($user_id) {
+        // Get stats for a specific user
+        $stmt = $pdo->prepare("
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN prediction_result = 1 THEN 1 ELSE 0 END) as positive,
+                SUM(CASE WHEN prediction_result = 0 THEN 1 ELSE 0 END) as negative
+            FROM predictions
+            WHERE user_id = ?
+        ");
+        $stmt->execute([$user_id]);
+        $predictionStats = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $stmt = $pdo->prepare("
+            SELECT 
+                p.id,
+                p.prediction_result,
+                p.created_at,
+                u.username,
+                u.email
+            FROM predictions p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.user_id = ?
+            ORDER BY p.created_at DESC
+            LIMIT 10
+        ");
+        $stmt->execute([$user_id]);
+        $recentActivities = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $response = [
+            'success' => true,
+            'totalPredictions' => (int)$predictionStats['total'],
+            'positivePredictions' => (int)$predictionStats['positive'],
+            'negativePredictions' => (int)$predictionStats['negative'],
+            'total_predictions' => (int)$predictionStats['total'],
+            'high_risk_cases' => (int)$predictionStats['positive'],
+            'low_risk_cases' => (int)$predictionStats['negative'],
+            'recent_activities' => $recentActivities,
+            'last_updated' => date('Y-m-d H:i:s')
+        ];
+        header('Content-Type: application/json');
+        header('Cache-Control: no-cache, must-revalidate');
+        echo json_encode($response);
+        exit;
+    }
     
     // Get total users
     $stmt = $pdo->query("SELECT COUNT(*) as total FROM users");

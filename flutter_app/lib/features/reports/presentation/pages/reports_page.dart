@@ -53,8 +53,10 @@ class _ReportsPageState extends State<ReportsPage> {
 
   Future<void> _loadStatistics() async {
     try {
+      final authProvider = context.read<AuthProvider>();
       final apiService = ApiService();
-      final response = await apiService.getDashboardStats();
+      final response =
+          await apiService.getDashboardStats(authProvider.currentUser!.id);
       if (response.success) {
         setState(() {
           _statistics = response.data;
@@ -176,19 +178,19 @@ class _ReportsPageState extends State<ReportsPage> {
         ),
         _buildStatCard(
           'Accuracy Rate',
-          '${stats['accuracy_rate'] ?? 0}%',
+          '${stats['system_accuracy'] ?? 0}%',
           Icons.trending_up,
           AppTheme.successColor,
         ),
         _buildStatCard(
           'High Risk Cases',
-          '${_predictions.where((p) => p.prediction == 1).length}',
+          '${stats['high_risk_cases'] ?? 0}',
           Icons.warning,
           AppTheme.dangerColor,
         ),
         _buildStatCard(
           'Low Risk Cases',
-          '${_predictions.where((p) => p.prediction == 0).length}',
+          '${stats['low_risk_cases'] ?? 0}',
           Icons.check_circle,
           AppTheme.successColor,
         ),

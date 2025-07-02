@@ -4,16 +4,22 @@ session_start();
 // Required files
 require_once dirname(__DIR__) . '/config.php';
 
-// Check if user is logged in
-if (!isset($_SESSION['user'])) {
+// Check if user is logged in or user_id is provided for API
+$user_id_param = $_GET['user_id'] ?? $_POST['user_id'] ?? null;
+if (!isset($_SESSION['user']) && !$user_id_param) {
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'User not logged in']);
     exit;
 }
 
 try {
-    $user_id = $_SESSION['user']['id'];
-    $user_role = $_SESSION['user']['role'];
+    $user_id = $_SESSION['user']['id'] ?? $user_id_param;
+    $user_role = $_SESSION['user']['role'] ?? 'user';
+    // If user_id_param is set, only allow if admin or the same user
+    if ($user_id_param && isset($_SESSION['user']) && $_SESSION['user']['role'] !== 'admin' && $_SESSION['user']['id'] != $user_id_param) {
+        echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+        exit;
+    }
     
     // Check if appointments table exists
     $stmt = $pdo->query("SHOW TABLES LIKE 'appointments'");
