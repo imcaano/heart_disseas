@@ -529,12 +529,13 @@ $stats = $stats_stmt->fetch(PDO::FETCH_ASSOC);
             document.getElementById('statusSuccessAlert').style.display = 'none';
             document.getElementById('statusErrorAlert').style.display = 'none';
             $.ajax({
-                url: 'index.php?route=update_appointment_status',
+                url: 'api/update_appointment_status.php',
                 method: 'POST',
-                data: {
+                contentType: 'application/json',
+                data: JSON.stringify({
                     appointment_id: appointmentId,
                     status: status
-                },
+                }),
                 dataType: 'json',
                 success: function(response) {
                     if (response.success) {

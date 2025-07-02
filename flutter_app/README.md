@@ -49,7 +49,8 @@ python app.py
 cd flutter_app
 
 # Run Flutter app in Chrome
-flutter run -d chrome
+  flutter run -d web-server
+
 ```
 **Flutter app will open in Chrome at: http://localhost:8080**
 

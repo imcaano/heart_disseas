@@ -73,10 +73,10 @@ try {
     // Log the status update activity
     $stmt = $pdo->prepare("
         INSERT INTO user_activity_log (user_id, activity_type, description, ip_address) 
-        VALUES (?, 'appointment_status_update', ?)
+        VALUES (?, 'appointment_status_update', ? , ?)
     ");
     $description = "Appointment #$appointment_id status updated to $status";
-    $stmt->execute([$_SESSION['user']['id'], $description]);
+    $stmt->execute([$_SESSION['user']['id'], $description, $_SERVER['REMOTE_ADDR']]);
 
     // Send notification email to user (optional)
     if ($status === 'approved' || $status === 'rejected') {
