@@ -41,7 +41,10 @@ try {
 
     // Get JSON data from request body
     $input = json_decode(file_get_contents('php://input'), true);
-    
+    // Fallback for web form submissions
+    if (!$input && !empty($_POST)) {
+        $input = $_POST;
+    }
     if (!$input) {
         echo json_encode(['success' => false, 'message' => 'Invalid JSON data']);
         exit;

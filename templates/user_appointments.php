@@ -326,7 +326,11 @@ $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         </div>
                                     </div>
                                     <span class="status-badge status-<?php echo $appointment['status']; ?>">
-                                        <?php echo ucfirst($appointment['status']); ?>
+                                        <?php if ($appointment['status'] === 'approved'): ?>
+                                            <i class="fas fa-check-circle me-1"></i>Approved
+                                        <?php else: ?>
+                                            <?php echo ucfirst($appointment['status']); ?>
+                                        <?php endif; ?>
                                     </span>
                                 </div>
 
@@ -378,7 +382,7 @@ $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <?php elseif ($appointment['status'] === 'approved'): ?>
                                     <div class="alert alert-success mt-3 mb-0">
                                         <i class="fas fa-check-circle me-2"></i>
-                                        Your appointment has been approved! Please arrive 10 minutes before your scheduled time.
+                                        <strong>Your appointment has been <u>approved</u>!</strong> Please arrive 10 minutes before your scheduled time. You will also receive a confirmation email.
                                     </div>
                                 <?php elseif ($appointment['status'] === 'rejected'): ?>
                                     <div class="alert alert-warning mt-3 mb-0">

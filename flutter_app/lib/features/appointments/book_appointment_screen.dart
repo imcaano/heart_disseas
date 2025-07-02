@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'appointment_model.dart';
 import 'appointment_provider.dart';
+import '../../../core/providers/auth_provider.dart';
 
 class BookAppointmentScreen extends StatefulWidget {
   final int? predictionId;
@@ -24,7 +25,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
   final _reasonController = TextEditingController();
-  
+
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 1));
   TimeOfDay _selectedTime = const TimeOfDay(hour: 9, minute: 0);
   bool _isLoading = false;
@@ -34,7 +35,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     super.initState();
     // Pre-fill reason if prediction result is positive
     if (widget.predictionResult == '1') {
-      _reasonController.text = 'High risk heart disease prediction - Consultation required';
+      _reasonController.text =
+          'High risk heart disease prediction - Consultation required';
     }
   }
 
@@ -77,25 +79,38 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   Future<void> _bookAppointment() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final authProvider = context.read<AuthProvider>();
+    final userId = authProvider.currentUser?.id;
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('User not logged in!'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
     try {
       final appointment = Appointment(
-        userId: 1, // This should come from user session
+        userId: userId, // Use real user ID
         patientName: _nameController.text,
         patientEmail: _emailController.text,
         patientPhone: _phoneController.text,
         appointmentDate: _selectedDate,
-        appointmentTime: '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}:00',
+        appointmentTime:
+            '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}:00',
         address: _addressController.text,
         reason: _reasonController.text,
         predictionId: widget.predictionId,
         createdAt: DateTime.now(),
       );
 
-      final success = await context.read<AppointmentProvider>().bookAppointment(appointment);
+      final success = await context
+          .read<AppointmentProvider>()
+          .bookAppointment(appointment);
 
       if (success) {
         if (mounted) {
@@ -111,7 +126,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(context.read<AppointmentProvider>().error ?? 'Failed to book appointment'),
+              content: Text(context.read<AppointmentProvider>().error ??
+                  'Failed to book appointment'),
               backgroundColor: Colors.red,
             ),
           );
@@ -228,7 +244,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your email';
                           }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                              .hasMatch(value)) {
                             return 'Please enter a valid email';
                           }
                           return null;
@@ -361,12 +378,14 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : const Text(
                         'Book Appointment',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
               ),
             ],
@@ -375,4 +394,4 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       ),
     );
   }
-} 
+}

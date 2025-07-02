@@ -90,6 +90,8 @@ if (!isset($_SESSION['user'])) {
                                 <div class="col-md-8">
                                     <div class="card profile-info-card mt-4 mx-auto" style="max-width: 600px;">
                                         <div id="passwordSuccessAlert" style="display:none;" class="alert alert-success text-center mb-4">Password changed successfully!</div>
+                                        <div id="profileSuccessAlert" style="display:none;" class="alert alert-success text-center mb-4">Profile updated successfully!</div>
+                                        <div id="profileErrorAlert" style="display:none;" class="alert alert-danger text-center mb-4"></div>
                                         <div class="row">
                                             <div class="col-md-4 text-center">
                                                 <div class="profile-avatar mb-3" style="font-size:2.5rem; background: #4e73df; color: #fff; border-radius: 16px; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
@@ -126,7 +128,6 @@ if (!isset($_SESSION['user'])) {
                                         <hr>
                                         <div class="password-form mt-3">
                                             <h5 class="mb-3">Update Profile Information</h5>
-                                            <div id="profileSuccessAlert" style="display:none;" class="alert alert-success text-center mb-4">Profile updated successfully!</div>
                                             <form id="profileForm">
                                                 <div class="mb-3">
                                                     <label for="username" class="form-label">Username</label>
@@ -215,6 +216,8 @@ if (!isset($_SESSION['user'])) {
         // Profile Update Form
         document.getElementById('profileForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            document.getElementById('profileSuccessAlert').style.display = 'none';
+            document.getElementById('profileErrorAlert').style.display = 'none';
             
             const username = document.getElementById('username').value;
             const email = document.getElementById('email').value;
@@ -239,14 +242,12 @@ if (!isset($_SESSION['user'])) {
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Show success message
                     document.getElementById('profileSuccessAlert').style.display = 'block';
-                    setTimeout(() => { 
-                        document.getElementById('profileSuccessAlert').style.display = 'none'; 
+                    setTimeout(() => {
+                        document.getElementById('profileSuccessAlert').style.display = 'none';
                     }, 4000);
                     
                     // Update the displayed username and email on the page
-                    document.querySelector('.profile-info h6').textContent = username;
                     document.querySelectorAll('.profile-info-value')[0].textContent = username;
                     document.querySelectorAll('.profile-info-value')[1].textContent = email;
                     
@@ -254,25 +255,14 @@ if (!isset($_SESSION['user'])) {
                     document.querySelectorAll('.profile-avatar').forEach(avatar => {
                         avatar.textContent = username.charAt(0).toUpperCase();
                     });
-                    
-                    // Update the displayed username in the profile section
-                    document.querySelectorAll('h4').forEach(h4 => {
-                        if (h4.textContent.includes('<?php echo htmlspecialchars($_SESSION['user']['username']); ?>')) {
-                            h4.textContent = username;
-                        }
-                    });
-                    
-                    // Update the username in the sidebar
-                    const sidebarUsername = document.querySelector('.profile-info h6');
-                    if (sidebarUsername) {
-                        sidebarUsername.textContent = username;
-                    }
                 } else {
-                    alert('Error: ' + result.message);
+                    document.getElementById('profileErrorAlert').textContent = result.message || 'Error updating profile.';
+                    document.getElementById('profileErrorAlert').style.display = 'block';
                 }
             } catch (error) {
+                document.getElementById('profileErrorAlert').textContent = 'An error occurred. Please try again.';
+                document.getElementById('profileErrorAlert').style.display = 'block';
                 console.error('Error:', error);
-                alert('An error occurred. Please try again.');
             } finally {
                 submitBtn.innerHTML = originalBtnText;
                 submitBtn.disabled = false;

@@ -124,7 +124,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.white.withOpacity(0.2),
-                    child: const Icon(Icons.person, size: 30, color: Colors.white),
+                    child:
+                        const Icon(Icons.person, size: 30, color: Colors.white),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -168,14 +169,15 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildStatsGrid(PredictionProvider predictionProvider) {
     final stats = predictionProvider.dashboardStats;
-    final totalPredictions =
-        stats?['total_predictions'] ?? stats?['totalPredictions'] ?? 0;
+    final totalPredictions = stats?['total_predictions'] ??
+        stats?['totalPredictions'] ??
+        predictionProvider.totalPredictions;
     final highRiskPredictions = stats?['high_risk'] ??
-        stats?['highRiskCount'] ??
         stats?['highRisk'] ??
-        0;
-    final lowRiskPredictions =
-        stats?['low_risk'] ?? stats?['lowRiskCount'] ?? stats?['lowRisk'] ?? 0;
+        predictionProvider.highRiskPredictions;
+    final lowRiskPredictions = stats?['low_risk'] ??
+        stats?['lowRisk'] ??
+        predictionProvider.lowRiskPredictions;
     final successRate = totalPredictions > 0
         ? ((lowRiskPredictions / totalPredictions) * 100).toStringAsFixed(1)
         : '0';
@@ -198,19 +200,19 @@ class _DashboardPageState extends State<DashboardPage> {
           'Positive',
           highRiskPredictions.toString(),
           Icons.warning,
-          AppTheme.dangerColor,
+          Colors.red,
         ),
         _buildStatCard(
           'Negative',
           lowRiskPredictions.toString(),
           Icons.check_circle,
-          AppTheme.successColor,
+          Colors.green,
         ),
         _buildStatCard(
           'Success Rate',
           '$successRate%',
-          Icons.trending_up,
-          AppTheme.warningColor,
+          Icons.percent,
+          AppTheme.primaryDark,
         ),
       ],
     );

@@ -491,6 +491,9 @@ $stats = $stats_stmt->fetch(PDO::FETCH_ASSOC);
         </div>
     </div>
 
+    <div id="statusSuccessAlert" style="display:none;" class="alert alert-success text-center mb-4">Appointment status updated successfully!</div>
+    <div id="statusErrorAlert" style="display:none;" class="alert alert-danger text-center mb-4"></div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -523,30 +526,29 @@ $stats = $stats_stmt->fetch(PDO::FETCH_ASSOC);
             if (!confirm(`Are you sure you want to ${status} this appointment?`)) {
                 return;
             }
-
-            console.log('Updating appointment status:', { appointmentId, status });
-
+            document.getElementById('statusSuccessAlert').style.display = 'none';
+            document.getElementById('statusErrorAlert').style.display = 'none';
             $.ajax({
                 url: 'index.php?route=update_appointment_status',
                 method: 'POST',
-                data: { 
-                    appointment_id: appointmentId, 
-                    status: status 
+                data: {
+                    appointment_id: appointmentId,
+                    status: status
                 },
                 dataType: 'json',
                 success: function(response) {
-                    console.log('Response received:', response);
                     if (response.success) {
-                        alert('Appointment status updated successfully!');
-                        location.reload();
+                        document.getElementById('statusSuccessAlert').style.display = 'block';
+                        setTimeout(function() { location.reload(); }, 1500);
                     } else {
-                        alert(response.message || 'Failed to update appointment status.');
+                        document.getElementById('statusErrorAlert').textContent = response.message || 'Failed to update appointment status.';
+                        document.getElementById('statusErrorAlert').style.display = 'block';
                     }
                 },
                 error: function(xhr, status, error) {
+                    document.getElementById('statusErrorAlert').textContent = 'An error occurred while updating appointment status.';
+                    document.getElementById('statusErrorAlert').style.display = 'block';
                     console.error('AJAX Error:', { xhr, status, error });
-                    console.log('Response text:', xhr.responseText);
-                    alert('An error occurred while updating appointment status. Check console for details.');
                 }
             });
         }
